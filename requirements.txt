@@ -1,0 +1,16 @@
+torch
+python-dotenv
+SQLAlchemy
+pandas
+requests
+numpy==1.26.4
+setuptools
+apify_client
+boto3
+ezkl==10.2.7
+onnx
+onnxruntime
+bittensor==6.9.3
+GitPython
+wandb
+psutil
