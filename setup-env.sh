@@ -11,7 +11,7 @@ SHOULD_RESTART=false
 install_python() {
 	case ${OS} in
 	'Linux')
-		# FIXME(Ivan): Linux is not always Ubuntu, checking DISTRIB_ID is recommended here
+		# FIXME: Linux is not always Ubuntu, checking DISTRIB_ID is recommended here
 		sudo apt update
 		sudo apt install -y python3 python3-pip python3-venv
 		SHOULD_RESTART=true
@@ -98,32 +98,34 @@ if ! command -v pm2 >/dev/null 2>&1; then
 	sudo npm install -g pm2
 fi
 
+# Set the install path to the current directory
+INSTALL_PATH=$(pwd)
+
 # Ask user for virtualenv type
 read -rp "Which virtualenv would you like to use? (venv/virtualenv/none): " VENV_TYPE </dev/tty
-VENV_TYPE=${VENV_TYPE:-none}
+VENV_TYPE=${VENV_TYPE:-venv}
 
 # Install and activate virtualenv if requested
 if [[ ${VENV_TYPE} == "venv" ]]; then
 	echo "Setting up venv..."
-	python3 -m venv "${INSTALL_PATH}"/omron-venv
-	source "${INSTALL_PATH}"/omron-venv/bin/activate
+	python3 -m venv "${INSTALL_PATH}/venv"
+	source "${INSTALL_PATH}/venv/bin/activate"
 elif [[ ${VENV_TYPE} == "virtualenv" ]]; then
 	echo "Setting up virtualenv..."
 	sudo pip3 install virtualenv
-	virtualenv "${INSTALL_PATH}"/omron-venv
-	source "${INSTALL_PATH}"/omron-venv/bin/activate
+	virtualenv "${INSTALL_PATH}/venv"
+	source "${INSTALL_PATH}/venv/bin/activate"
 fi
 
 # Install Python dependencies from requirements.txt
 echo "Installing Python dependencies..."
-python3 -m pip install -r "${INSTALL_PATH}"/requirements.txt
-
+python3 -m pip install -r "${INSTALL_PATH}/requirements.txt"
 
 # Show completion message and prompt user to restart their terminal if necessary
 if [[ ${SHOULD_RESTART} == true ]]; then
 	echo -e "\033[32mInstallation complete. Please restart your terminal for the changes to take effect.\033[0m"
 else
-	echo -e "\033[32mInstallation complete. \033[0m"
+	echo -e "\033[32mInstallation complete.\033[0m"
 fi
 
 # Set working directory to install dir

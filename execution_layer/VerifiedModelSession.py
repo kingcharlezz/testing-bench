@@ -12,7 +12,6 @@ import ezkl
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
 def gen_witness(input_path, circuit_path, witness_path, vk_path, srs_path):
     bt.logging.trace("Generating witness")
     res = ezkl.gen_witness(
@@ -24,10 +23,7 @@ def gen_witness(input_path, circuit_path, witness_path, vk_path, srs_path):
     )
     bt.logging.trace(f"Gen witness result: {res}")
 
-
-async def gen_proof(
-    input_path, vk_path, witness_path, circuit_path, pk_path, proof_path, srs_path
-):
+async def gen_proof(input_path, vk_path, witness_path, circuit_path, pk_path, proof_path, srs_path):
     gen_witness(input_path, circuit_path, witness_path, vk_path, srs_path)
 
     bt.logging.trace("Generating proof")
@@ -41,10 +37,16 @@ async def gen_proof(
     )
     bt.logging.trace(f"Proof generated: {proof_path}, result: {res}")
 
+def proof_worker(input_path, vk_path, witness_path, circuit_path, pk_path, proof_path, srs_path):
+    print(f"proof_worker called with:")
+    print(f"  input_path: {input_path}")
+    print(f"  vk_path: {vk_path}")
+    print(f"  witness_path: {witness_path}")
+    print(f"  circuit_path: {circuit_path}")
+    print(f"  pk_path: {pk_path}")
+    print(f"  proof_path: {proof_path}")
+    print(f"  srs_path: {srs_path}")
 
-def proof_worker(
-    input_path, vk_path, witness_path, circuit_path, pk_path, proof_path, srs_path
-):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
@@ -63,9 +65,7 @@ def proof_worker(
     finally:
         loop.close()
 
-
 class VerifiedModelSession:
-
     def __init__(self, public_inputs=None, model_id=None):
         if public_inputs is None:
             public_inputs = []
@@ -74,9 +74,8 @@ class VerifiedModelSession:
         self.model_id = model_id[0]
         self.session_id = str(uuid.uuid4())
         self.model_name = f"model_{self.model_id}"
-        model_path = os.path.join(
-            os.path.dirname(dir_path), "deployment_layer", self.model_name
-        )
+        
+        model_path = os.path.join(os.path.dirname(dir_path), "deployment_layer", self.model_name)
 
         self.pk_path = os.path.join(model_path, "pk.key")
         self.vk_path = os.path.join(model_path, "vk.key")
@@ -102,11 +101,15 @@ class VerifiedModelSession:
         self.py_run_args.output_visibility = "public"
         self.py_run_args.param_visibility = "fixed"
 
-    # Generate the input.json file, which is used in witness generation
     def gen_input_file(self):
         bt.logging.trace("Generating input file")
-        input_data = self.public_inputs
-        input_shapes = [[1]]
+        
+        # The input data should be a nested list, where each inner list represents one instance
+        input_data = [self.public_inputs]  # Assuming self.public_inputs is a list of inputs for one instance
+        
+        # The input shape should match the shape of input_data
+        input_shapes = [[1, len(self.public_inputs)]]  # Assuming a single instance with a number of features equal to the length of self.public_inputs
+        
         data = {"input_data": input_data, "input_shapes": input_shapes}
 
         dir_name = os.path.dirname(self.input_path)
@@ -127,7 +130,6 @@ class VerifiedModelSession:
             f"New instances after appending with last instances from output: {new_instances}"
         )
         proof_json["instances"] = [new_instances]
-        # Enforce EVM transcript type to be used for all proofs, ensuring all are valid for proving on EVM chains
         proof_json["transcript_type"] = "EVM"
         bt.logging.trace(f"Proof json: {proof_json}")
 
@@ -136,9 +138,6 @@ class VerifiedModelSession:
             f.close()
 
     def aggregate_proofs(self, proofs):
-        """
-        Aggregates proofs for the previous weight adjustment period.
-        """
         try:
             proof_paths = []
             for i, proof in enumerate(proofs):
@@ -253,5 +252,5 @@ class VerifiedModelSession:
         self.remove_temp_files()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-
+        self.end()
         return None
