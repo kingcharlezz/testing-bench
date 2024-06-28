@@ -44,4 +44,4 @@ if __name__ == "__main__":
     
     while True:
         simulate_proof_request(test_model_id)
-        time.sleep(5)  # Adding a delay to avoid overloading the system
+        time.sleep(3)  # Adding a delay to avoid overloading the system
