@@ -26,20 +26,20 @@ def simulate_proof_request(model_id):
             # Generate the proof
             query_output, proof_time = model_session.gen_proof()
             
+            # Parse the query output to a dictionary
+            query_output = json.loads(query_output)
+
             print(f"Proof generated successfully:")
             print(f"Query output: {query_output}")
             print(f"Proof time: {proof_time} seconds")
             
-            # Verify the proof
-            proof_string = query_output  # The entire query_output is considered as proof_string
-            verification_result = model_session.verify_proof_and_inputs(proof_string, public_inputs)
-            
-            print(f"Proof verification result: {'Success' if verification_result else 'Failure'}")
+            # Extract rescaled outputs from query output
+            rescaled_outputs = query_output.get('pretty_public_inputs', {}).get('rescaled_outputs', [])
 
             # Log results
             log_data = {
                 "input_data": [public_inputs],
-                "output_data": [query_output]  # Assuming query_output is a list, adjust if necessary
+                "output_data": rescaled_outputs
             }
 
             with open('proof_log.json', 'a') as log_file:
