@@ -36,6 +36,16 @@ def simulate_proof_request(model_id):
             
             print(f"Proof verification result: {'Success' if verification_result else 'Failure'}")
 
+            # Log results
+            log_data = {
+                "input_data": [public_inputs],
+                "output_data": [query_output]  # Assuming query_output is a list, adjust if necessary
+            }
+
+            with open('proof_log.json', 'a') as log_file:
+                json.dump(log_data, log_file)
+                log_file.write('\n')
+
     except Exception as e:
         print(f"Error during proof generation or verification: {e}")
 
