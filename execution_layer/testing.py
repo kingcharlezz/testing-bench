@@ -39,7 +39,8 @@ def simulate_proof_request(model_id):
             # Log results
             log_data = {
                 "input_data": [public_inputs],
-                "output_data": rescaled_outputs
+                "output_data": rescaled_outputs,
+                "time": proof_time,
             }
 
             with open('proof_log.json', 'a') as log_file:
